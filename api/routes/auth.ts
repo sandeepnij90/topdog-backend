@@ -1,20 +1,12 @@
 import express from "express";
-import { registerUser, registerCompany } from "../controllers/register";
+import { registerUser } from "../controllers/register";
+import { loginTrainer } from "../controllers/login";
+import { checkToken } from "../middleware/checkToken";
+import { refreshToken } from "../controllers/refreshToken";
+
 export const router = express.Router();
 
-router.post("/login", (req, res, next) => {
-  const { email, password } = req.body;
-
-  if (!email || !password) {
-    return res.status(400).json({
-      message: "email and password are required",
-    });
-  }
-
-  res.status(200).json({
-    message: "login endpoint",
-  });
-});
+router.post("/login", loginTrainer);
 
 router.post("/test", (req, res) => {
   console.log("endpoint hit");
@@ -24,5 +16,10 @@ router.post("/test", (req, res) => {
 });
 
 router.post("/register", registerUser);
+router.get("/refresh-token", refreshToken);
 
-router.patch("/register/:id/company", registerCompany);
+router.get("/test", checkToken, (req, res) => {
+  res.status(200).json({
+    message: "test endpoint hit",
+  });
+});

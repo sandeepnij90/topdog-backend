@@ -31,7 +31,7 @@ export const registerUser = async (req: Request, res: Response) => {
     return res.status(500).json({ err });
   }
 
-  bcrypt.hash(password, 10, async (err, hash) => {
+  await bcrypt.hash(password, 10, async (err, hash) => {
     if (err) {
       return res.status(500).json({ err });
     }
