@@ -42,6 +42,7 @@ export const registerUser = async (req: Request, res: Response) => {
         name,
         email,
         password: hash,
+        companyName,
       });
 
       const result = await newUser.save();
@@ -50,61 +51,4 @@ export const registerUser = async (req: Request, res: Response) => {
       return res.status(500).json({ err });
     }
   });
-};
-
-export const registerCompany = async (req: Request, res: Response) => {
-  const {
-    companyName,
-    primaryColor,
-    primaryTextColor,
-    buttonBackgroundColor,
-    buttonTextColor,
-  } = req.body;
-  const { id } = req.params;
-
-  if (
-    !companyName ||
-    !primaryColor ||
-    !primaryTextColor ||
-    !buttonBackgroundColor ||
-    !buttonTextColor
-  ) {
-    return res.status(400).json({
-      message:
-        "companyName, primaryColor and primaryTextColor, buttonBackgroundColor, buttonTextColor are required",
-    });
-  }
-
-  try {
-    const existingUser = await User.find({ _id: id }).exec();
-
-    if (existingUser.length < 1) {
-      return res.status(400).json({
-        message: "user does not exist",
-      });
-    }
-  } catch (err) {
-    return res.status(500).json({ err });
-  }
-
-  try {
-    const updatedUser = await User.updateOne(
-      { _id: id },
-      {
-        $set: {
-          companyName,
-          theme: {
-            primaryColor,
-            primaryTextColor,
-            buttonBackgroundColor,
-            buttonTextColor,
-          },
-        },
-      }
-    ).exec();
-
-    return res.status(200).json(updatedUser);
-  } catch (err) {
-    return res.status(500).json({ err });
-  }
 };
