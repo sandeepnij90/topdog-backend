@@ -92,7 +92,12 @@ export const loginTrainer = async (req: Request, res: Response) => {
 
         return res
           .status(200)
-          .json({ message: "Auth successful", accessToken });
+          .json({
+            message: "Auth successful",
+            accessToken,
+            verified: user.verified,
+            userId: user._id,
+          });
       }
 
       return res.status(401).json({
