@@ -22,6 +22,7 @@ export const checkToken = async (
     jwt.verify(token, process.env.JWT_SECRET_KEY || "");
     next();
   } catch (err) {
+    console.log("HERE!!!");
     return res.status(401).json({
       message: "Auth failed",
     });

@@ -1,11 +1,13 @@
-import Token from "../models/token";
 import { Request, Response } from "express";
+import { getPool } from "../../utils/getPool";
 import jwt from "jsonwebtoken";
 import dotenv from "dotenv";
 
 dotenv.config();
 
 export const refreshToken = async (req: Request, res: Response) => {
+  const pool = getPool();
+
   const { authorization = "" } = req.headers;
   const token = authorization.split(" ")[1];
 
@@ -16,46 +18,56 @@ export const refreshToken = async (req: Request, res: Response) => {
   }
 
   try {
-    const existingToken = await Token.findOne({ accessToken: token }).exec();
-    if (!existingToken) {
+    const data = await pool.query(
+      `SELECT * FROM token WHERE access_token = $1`,
+      [token]
+    );
+
+    const hasNoToken = data.rows.length === 0;
+
+    if (hasNoToken) {
       return res.status(401).json({
         message: "Auth failed",
       });
     }
 
-    const refreshToken = existingToken.refreshToken;
+    const refreshToken = data.rows[0].refresh_token;
     try {
       jwt.verify(refreshToken, process.env.JWT_SECRET_KEY || "");
       const updatedAccessToken = jwt.sign(
         {
-          userId: existingToken.userId,
+          userId: data.rows[0].trainer_id,
         },
         process.env.JWT_SECRET_KEY || "",
-        { expiresIn: "1m" }
+        {
+          expiresIn: "1d",
+        }
       );
 
       try {
-        await Token.findOneAndUpdate(
-          { userId: existingToken.userId },
-          { accessToken: updatedAccessToken }
-        ).exec();
+        await pool.query(`UPDATE token SET access_token = $1 WHERE id = $2`, [
+          updatedAccessToken,
+          data.rows[0].trainer_id,
+        ]);
 
         res.status(201).json({
           accessToken: updatedAccessToken,
         });
-      } catch (err) {
+      } catch (error) {
         return res.status(500).json({
           message: "Failed updating the token",
+          error,
         });
       }
-    } catch (err) {
+    } catch (error) {
       return res.status(401).json({
         message: "Auth failed",
       });
     }
-  } catch (err) {
+  } catch (error) {
     return res.status(500).json({
       message: "Could not execute searching existing token",
+      error,
     });
   }
 };

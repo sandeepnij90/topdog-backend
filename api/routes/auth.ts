@@ -1,20 +1,19 @@
 import express from "express";
-import { registerUser } from "../controllers/register";
-import { loginTrainer } from "../controllers/login";
+import { registerTrainer } from "../controllers/registerTrainer";
+import { login } from "../controllers/login";
 import { checkToken } from "../middleware/checkToken";
 import { refreshToken } from "../controllers/refreshToken";
 import { sendEmail } from "../controllers/sendEmail";
 import { verifyUser } from "../controllers/verifyUser";
-import { checkVerified } from "../controllers/checkVerified";
+import { getVerified } from "../controllers/getVerified";
 
 export const router = express.Router();
 
-router.post("/login", loginTrainer);
-
-router.post("/register", registerUser);
+router.post("/login", login);
+router.post("/register", registerTrainer);
 router.get("/refresh-token", refreshToken);
 router.get("/verify-email/:userId", verifyUser);
-router.get("/check-verified/:userId", checkVerified);
+router.post("/check-verified", getVerified);
 
 router.get("/test", checkToken, (req, res) => {
   res.status(200).json({
