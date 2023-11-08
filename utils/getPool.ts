@@ -6,6 +6,6 @@ export const getPool = () => {
     port: 5432,
     database: "topdog",
   });
-
+  pool.connect();
   return pool;
 };

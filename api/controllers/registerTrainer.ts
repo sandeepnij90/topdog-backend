@@ -6,7 +6,7 @@ import crypto from "crypto";
 export const registerTrainer = (req: Request, res: Response) => {
   const pool = getPool();
 
-  const { name, email, companyName, password, confirmPassword, phoneNumber } =
+  const { name, email, companyName, password, confirmPassword, phone } =
     req.body;
 
   if (
@@ -15,11 +15,11 @@ export const registerTrainer = (req: Request, res: Response) => {
     !companyName ||
     !password ||
     !confirmPassword ||
-    !phoneNumber
+    !phone
   ) {
     return res.status(400).json({
       message:
-        "name, email, companyName, password, confirmPassword and phoneNumber are required",
+        "name, email, companyName, password, confirmPassword and phone are required",
     });
   }
 
@@ -38,21 +38,14 @@ export const registerTrainer = (req: Request, res: Response) => {
     }
     try {
       await pool.query(
-        "INSERT INTO trainer (name, email, company_name, password, phone_number, verified, verification_code) VALUES ($1, $2, $3, $4, $5, $6, $7)",
-        [
-          name,
-          email,
-          companyName,
-          hash,
-          phoneNumber,
-          false,
-          crypto.randomUUID(),
-        ]
+        "INSERT INTO trainer (name, email, company_name, password, phone, verified, verification_code) VALUES ($1, $2, $3, $4, $5, $6, $7)",
+        [name, email, companyName, hash, phone, false, crypto.randomUUID()]
       );
       res.status(201).json({
         message: "Trainer added",
       });
     } catch (error) {
+      console.log({ error });
       return res.status(500).json({
         message: "Couldnt execute query to add trainer",
         error,

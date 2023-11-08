@@ -2,7 +2,7 @@ import { Request, Response } from "express";
 import { getPool } from "../../utils/getPool";
 
 export const addClient = async (req: Request, res: Response) => {
-  const { name, email, phone, dogName, dogAge, dogBreed, note, trainerId } =
+  const { name, email, phone, dogName, birthday, dogBreed, note, trainerId } =
     req.body;
   const pool = getPool();
 
@@ -11,7 +11,7 @@ export const addClient = async (req: Request, res: Response) => {
     !email ||
     !phone ||
     !dogName ||
-    !dogAge ||
+    !birthday ||
     !dogBreed ||
     !trainerId
   ) {
@@ -29,8 +29,8 @@ export const addClient = async (req: Request, res: Response) => {
 
     try {
       const data = await pool.query(
-        `INSERT into dog (name, age, breed, client_id) VALUES ($1, $2, $3, $4) RETURNING id`,
-        [dogName, dogAge, dogBreed, clientId]
+        `INSERT into dog (name, birthday, breed, client_id) VALUES ($1, $2, $3, $4) RETURNING id`,
+        [dogName, birthday, dogBreed, clientId]
       );
       const dogId = data.rows[0].id;
 
@@ -57,12 +57,16 @@ export const addClient = async (req: Request, res: Response) => {
         message: "Client added",
       });
     } catch (error) {
+      console.log({ error });
+
       return res.status(500).json({
         message: "Couldnt add dog to database",
         error,
       });
     }
   } catch (error) {
+    console.log({ error });
+
     return res.status(500).json({
       message: "Couldnt execute query",
       error,

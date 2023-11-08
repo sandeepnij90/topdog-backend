@@ -1,8 +1,8 @@
 import { Request, Response } from "express";
-import { getClient } from "../../utils/getClient";
+import { getPool } from "../../utils/getPool";
 
 export const verifyUser = async (req: Request, res: Response) => {
-  const client = getClient();
+  const client = getPool();
   const { userId } = req.params;
   const { code } = req.query;
 
@@ -25,7 +25,6 @@ export const verifyUser = async (req: Request, res: Response) => {
         message: "User already verified",
       });
     }
-    console.log({ verification_code, code });
     if (verification_code !== code) {
       return res.status(401).json({
         message: "Invalid verification code",

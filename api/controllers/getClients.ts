@@ -2,7 +2,7 @@ import { Request, Response } from "express";
 import { getPool } from "../../utils/getPool";
 
 export const getClients = async (req: Request, res: Response) => {
-  const { trainerId } = req.body;
+  const { trainerId } = req.params;
   const pool = getPool();
 
   if (!trainerId) {
@@ -13,12 +13,12 @@ export const getClients = async (req: Request, res: Response) => {
 
   try {
     const data = await pool.query(
-      "SELECT c.*, d.name AS dogName, d.* FROM client AS c JOIN dog as d on c.id = d.client_id WHERE trainer_id = $1",
-      [trainerId]
+      "SELECT c.id, c.name, c.email, c.phone, COUNT(dog.id) AS number_of_dogs FROM client AS c JOIN dog ON dog.client_id = c.id WHERE c.trainer_id = $1 GROUP BY c.id",
+      [parseInt(trainerId)]
     );
     return res.status(200).json({
       message: "Clients fetched",
-      data: data.rows,
+      clients: data.rows,
     });
   } catch (error) {
     return res.status(500).json({
